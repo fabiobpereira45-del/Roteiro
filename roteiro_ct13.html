@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roteiro de Veículo – CT XIII Narandiba</title>
+<link rel="shortcut icon" href="logo.png.png" type="image/png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --azul: #1a3a5c;
+    --azul-medio: #265185;
+    --azul-claro: #3b7fc4;
+    --dourado: #c9a84c;
+    --dourado-claro: #e8c66d;
+    --creme: #f8f4ed;
+    --cinza-escuro: #2d2d2d;
+    --cinza: #5c5c5c;
+    --cinza-claro: #e8e4dd;
+    --branco: #ffffff;
+    --verde: #2a6b4a;
+    --vermelho: #8b2020;
+    --laranja: #b85c00;
+    --sombra: 0 4px 24px rgba(26,58,92,0.13);
+    --sombra-forte: 0 8px 40px rgba(26,58,92,0.22);
+    --radius: 10px;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--creme);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--azul-medio);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--azul);
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(15px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--creme);
+    color: var(--cinza-escuro);
+    min-height: 100vh;
+  }
+
+  /* ── LOGIN ── */
+  #loginScreen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--azul) 0%, var(--azul-medio) 60%, var(--azul-claro) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  #loginScreen::before {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: rgba(201,168,76,0.08);
+    top: -180px; right: -180px;
+  }
+  #loginScreen::after {
+    content: '';
+    position: absolute;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    bottom: -120px; left: -80px;
+  }
+  .loginCard {
+    background: var(--branco);
+    border-radius: 18px;
+    padding: 44px 40px 36px;
+    width: 420px;
+    box-shadow: var(--sombra-forte);
+    position: relative;
+    z-index: 1;
+    animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .loginLogo {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .loginLogo .brasaoContainer {
+    width: 80px; height: 80px;
+    background: var(--branco);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+    padding: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border: 2px solid var(--dourado);
+    transition: transform 0.3s ease;
+  }
+  .loginLogo .brasaoContainer:hover {
+    transform: scale(1.05) rotate(5deg);
+  }
+  .loginLogo .brasaoImg {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  .loginLogo h2 {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--azul);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.5;
+  }
+  .loginLogo p {
+    font-size: 0.7rem;
+    color: var(--cinza);
+    margin-top: 4px;
+  }
+  .loginTitle {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--azul);
+    margin-bottom: 22px;
+    border-bottom: 2px solid var(--dourado);
+    padding-bottom: 10px;
+  }
+  .formGroup {
+    margin-bottom: 16px;
+  }
+  .formGroup label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--azul);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .formGroup input, .formGroup select, .formGroup textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--cinza-claro);
+    border-radius: var(--radius);
+    font-family: 'Sora', sans-serif;
+    font-size: 0.88rem;
+    color: var(--cinza-escuro);
+    background: var(--creme);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  .formGroup input:focus, .formGroup select:focus, .formGroup textarea:focus {
+    border-color: var(--azul-claro);
+    box-shadow: 0 0 0 3px rgba(59,127,196,0.13);
+    background: var(--branco);
+  }
+  .formGroup textarea { resize: vertical; min-height: 80px; }
+  .btnPrimary {
+    width: 100%;
+    padding: 13px;
+    background: var(--azul);
+    color: var(--branco);
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'Sora', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    margin-top: 6px;
+  }
+  .btnPrimary:hover {
+    background: var(--azul-medio);
+    box-shadow: 0 4px 16px rgba(26,58,92,0.2);
+  }
+  .btnPrimary:active { transform: scale(0.98); }
+  .loginError {
+    color: var(--vermelho);
+    font-size: 0.78rem;
+    margin-top: 10px;
+    text-align: center;
+    min-height: 18px;
+  }
+
+  /* ── APP SHELL ── */
+  #appScreen { display: none; min-height: 100vh; }
+
+  .topbar {
+    background: var(--azul);
+    color: var(--branco);
+    padding: 0 28px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .topbarLeft {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .topbarLogoContainer {
+    width: 42px; height: 42px;
+    background: var(--branco);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    transition: transform 0.2s ease;
+  }
+  .topbarLogoContainer:hover {
+    transform: scale(1.08);
+  }
+  .topbarLogoImg {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  .topbarTitle {
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+  }
+  .topbarSub {
+    font-size: 0.68rem;
+    opacity: 0.7;
+    font-weight: 300;
+  }
+  .topbarRight {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .userBadge {
+    background: rgba(255,255,255,0.12);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 0.78rem;
+    font-weight: 500;
+  }
+  .btnLogout {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: var(--branco);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-family: 'Sora', sans-serif;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btnLogout:hover { background: rgba(255,255,255,0.2); }
+
+  .mainContent {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 28px 24px;
+  }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--azul);
+    border-radius: 12px;
+    padding: 5px;
+    margin-bottom: 28px;
+    width: fit-content;
+  }
+  .tab {
+    padding: 9px 20px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: rgba(255,255,255,0.65);
+    transition: all 0.2s;
+    border: none;
+    background: transparent;
+    font-family: 'Sora', sans-serif;
+    letter-spacing: 0.03em;
+  }
+  .tab:hover { color: var(--branco); background: rgba(255,255,255,0.1); }
+  .tab.active {
+    background: var(--dourado);
+    color: var(--azul);
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--branco);
+    border-radius: 14px;
+    padding: 24px 28px;
+    box-shadow: var(--sombra);
+    margin-bottom: 20px;
+    animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .cardTitle {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--azul);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .cardTitle span { font-size: 1.2rem; }
+
+  /* ── FORM GRID ── */
+  .formGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .formGrid .formGroup.full { grid-column: 1 / -1; }
+
+  .btnRow {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+  .btnSave {
+    padding: 11px 28px;
+    background: var(--azul);
+    color: var(--branco);
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'Sora', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+  .btnSave:hover { background: var(--azul-medio); box-shadow: var(--sombra); }
+  .btnCancel {
+    padding: 11px 22px;
+    background: var(--creme);
+    color: var(--cinza);
+    border: 1.5px solid var(--cinza-claro);
+    border-radius: var(--radius);
+    font-family: 'Sora', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btnCancel:hover { border-color: var(--azul-claro); color: var(--azul); }
+
+  /* ── TABLE ── */
+  .tableWrap { overflow-x: auto; border-radius: 10px; border: 1.5px solid var(--cinza-claro); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
+  thead tr { background: var(--azul); color: var(--branco); }
+  thead th {
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--cinza-claro);
+    transition: background 0.15s;
+  }
+  tbody tr:hover { background: rgba(59,127,196,0.05); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td {
+    padding: 11px 14px;
+    color: var(--cinza-escuro);
+    vertical-align: middle;
+  }
+  .actBtns { display: flex; gap: 6px; flex-wrap: nowrap; }
+  .btnEdit, .btnDel {
+    padding: 5px 11px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-family: 'Sora', sans-serif;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btnEdit { background: rgba(38,81,133,0.12); color: var(--azul-medio); }
+  .btnEdit:hover { background: var(--azul-medio); color: var(--branco); }
+  .btnDel { background: rgba(139,32,32,0.1); color: var(--vermelho); }
+  .btnDel:hover { background: var(--vermelho); color: var(--branco); }
+  .btnDisabled {
+    padding: 5px 11px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: #bbb;
+    background: #f4f4f4;
+    border: none;
+    cursor: not-allowed;
+  }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+  .badgeAzul { background: rgba(59,127,196,0.13); color: var(--azul-medio); }
+  .badgeVerde { background: rgba(42,107,74,0.12); color: var(--verde); }
+
+  /* ── FILTROS ── */
+  .filtersRow {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    margin-bottom: 20px;
+  }
+  .filterGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 160px;
+  }
+  .filterGroup label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--azul);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .filterGroup input, .filterGroup select {
+    padding: 8px 12px;
+    border: 1.5px solid var(--cinza-claro);
+    border-radius: 8px;
+    font-family: 'Sora', sans-serif;
+    font-size: 0.82rem;
+    color: var(--cinza-escuro);
+    background: var(--creme);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .filterGroup input:focus, .filterGroup select:focus {
+    border-color: var(--azul-claro);
+  }
+  .btnFilter {
+    padding: 9px 20px;
+    background: var(--azul-claro);
+    color: var(--branco);
+    border: none;
+    border-radius: 8px;
+    font-family: 'Sora', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    align-self: flex-end;
+  }
+  .btnFilter:hover { background: var(--azul-medio); }
+  .btnPDF {
+    padding: 9px 20px;
+    background: var(--dourado);
+    color: var(--azul);
+    border: none;
+    border-radius: 8px;
+    font-family: 'Sora', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    align-self: flex-end;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btnPDF:hover { background: var(--dourado-claro); box-shadow: var(--sombra); }
+
+  /* ── EMPTY STATE ── */
+  .emptyState {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--cinza);
+  }
+  .emptyState .emptyIcon { font-size: 40px; margin-bottom: 12px; }
+  .emptyState p { font-size: 0.88rem; }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: 28px; right: 28px;
+    background: var(--azul);
+    color: var(--branco);
+    padding: 13px 22px;
+    border-radius: 10px;
+    font-size: 0.83rem;
+    font-weight: 500;
+    box-shadow: var(--sombra-forte);
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    z-index: 9999;
+    max-width: 320px;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+  #toast.success { background: var(--verde); }
+  #toast.error { background: var(--vermelho); }
+
+  /* ── MODAL ── */
+  .modalOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,20,40,0.55);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modalOverlay.open { display: flex; }
+  .modalBox {
+    background: var(--branco);
+    border-radius: 16px;
+    padding: 32px 30px 24px;
+    width: 100%;
+    max-width: 600px;
+    box-shadow: var(--sombra-forte);
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modalTitle {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--azul);
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ── STATS ROW ── */
+  .statsRow {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+    animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .statCard {
+    background: var(--branco);
+    border-radius: 12px;
+    padding: 18px 20px;
+    box-shadow: var(--sombra);
+    border-left: 4px solid var(--azul);
+  }
+  .statCard.gold { border-left-color: var(--dourado); }
+  .statCard.green { border-left-color: var(--verde); }
+  .statCard.orange { border-left-color: var(--laranja); }
+  .statValue {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--azul);
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .statLabel {
+    font-size: 0.72rem;
+    color: var(--cinza);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .topbar { padding: 0 14px; }
+    .topbarTitle { font-size: 0.72rem; }
+    .mainContent { padding: 16px 12px; }
+    .loginCard { padding: 28px 20px; width: 100%; }
+    .tabs { width: 100%; justify-content: stretch; }
+    .tab { flex: 1; text-align: center; font-size: 0.75rem; padding: 8px 6px; }
+  }
+
+  .dividerLine {
+    height: 1px;
+    background: var(--cinza-claro);
+    margin: 18px 0;
+  }
+  .infoNote {
+    font-size: 0.75rem;
+    color: var(--cinza);
+    font-style: italic;
+    margin-top: -8px;
+    margin-bottom: 14px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="loginScreen">
+  <div class="loginCard">
+    <div class="loginLogo">
+      <div class="brasaoContainer">
+        <img src="logo.png.png" class="brasaoImg" id="loginLogoImg" alt="Logo">
+      </div>
+      <h2>Conselho Tutelar XIII da Criança e do Adolescente de Salvador</h2>
+      <p>Lei Federal 8.069/90 · Lei Municipal 6.266/03 · Narandiba</p>
+    </div>
+    <div class="loginTitle">🔑 Acesso ao Sistema de Roteiro</div>
+    <div class="formGroup">
+      <label>Usuário</label>
+      <input type="text" id="loginUser" placeholder="Digite seu usuário" autocomplete="username">
+    </div>
+    <div class="formGroup">
+      <label>Senha</label>
+      <input type="password" id="loginPass" placeholder="Digite sua senha" autocomplete="current-password">
+    </div>
+    <button class="btnPrimary" onclick="doLogin()">Entrar no Sistema</button>
+    <div class="loginError" id="loginError"></div>
+    <div class="dividerLine"></div>
+    <p class="infoNote">🔒 Sistema restrito aos conselheiros autorizados do CT XIII – Narandiba.</p>
+  </div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div id="appScreen">
+  <div class="topbar">
+    <div class="topbarLeft">
+      <div class="topbarLogoContainer">
+        <img src="logo.png.png" class="topbarLogoImg" id="topbarLogoImg" alt="Logo">
+      </div>
+      <div>
+        <div class="topbarTitle">CT XIII – Roteiro de Veículo</div>
+        <div class="topbarSub">Conselho Tutelar XIII · Narandiba · Salvador/BA</div>
+      </div>
+    </div>
+    <div class="topbarRight">
+      <div class="userBadge" id="userBadge">👤 Usuário</div>
+      <button class="btnLogout" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+
+  <div class="mainContent">
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('painel')" id="tab-painel">📊 Painel</button>
+      <button class="tab" onclick="showTab('registro')" id="tab-registro">➕ Novo Registro</button>
+      <button class="tab" onclick="showTab('registros')" id="tab-registros">📋 Registros</button>
+      <button class="tab" onclick="showTab('relatorio')" id="tab-relatorio">📄 Relatório PDF</button>
+    </div>
+
+    <!-- TAB: PAINEL -->
+    <div id="tabContent-painel">
+      <div class="statsRow" id="statsRow"></div>
+      <div class="card">
+        <div class="cardTitle"><span>🕐</span> Últimos Registros</div>
+        <div class="tableWrap">
+          <table id="tableRecent">
+            <thead>
+              <tr>
+                <th>Data/Hora</th>
+                <th>Conselheiro</th>
+                <th>Destino</th>
+                <th>Finalidade</th>
+                <th>Obs.</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyRecent"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: NOVO REGISTRO -->
+    <div id="tabContent-registro" style="display:none;">
+      <div class="card">
+        <div class="cardTitle"><span>➕</span> <span id="formTitle">Novo Registro de Roteiro</span></div>
+        <input type="hidden" id="editId">
+        <div class="formGrid">
+          <div class="formGroup">
+            <label>Data *</label>
+            <input type="date" id="fData">
+          </div>
+          <div class="formGroup">
+            <label>Hora de Saída *</label>
+            <input type="time" id="fHoraSaida">
+          </div>
+          <div class="formGroup">
+            <label>Hora de Retorno</label>
+            <input type="time" id="fHoraRetorno">
+          </div>
+          <div class="formGroup">
+            <label>Conselheiro *</label>
+            <select id="fConselheiro">
+              <option value="">— Selecione —</option>
+            </select>
+          </div>
+          <div class="formGroup">
+            <label>Motorista</label>
+            <input type="text" id="fMotorista" value="Joseílton Teixeira" readonly>
+          </div>
+          <div class="formGroup full">
+            <label>Destino *</label>
+            <input type="text" id="fDestino" placeholder="Ex: CREAS Narandiba, UPA Cajazeiras, Sede da SEMPS…">
+          </div>
+          <div class="formGroup full">
+            <label>Finalidade / Motivo da Visita *</label>
+            <input type="text" id="fFinalidade" placeholder="Descreva o objetivo do deslocamento">
+          </div>
+          <div class="formGroup full">
+            <label>Observações</label>
+            <textarea id="fObservacoes" placeholder="Informações adicionais sobre o percurso, paradas intermediárias, intercorrências etc."></textarea>
+          </div>
+        </div>
+        <div class="btnRow">
+          <button class="btnSave" onclick="saveRecord()">💾 Salvar Registro</button>
+          <button class="btnCancel" onclick="cancelEdit()">✖ Cancelar</button>
+        </div>
+      </div>
+      <p class="infoNote">⚠️ Os campos marcados com * são obrigatórios. O horário de funcionamento é de segunda a sexta, das 08h às 20h.</p>
+    </div>
+
+    <!-- TAB: REGISTROS -->
+    <div id="tabContent-registros" style="display:none;">
+      <div class="card">
+        <div class="cardTitle"><span>🔍</span> Filtrar Registros</div>
+        <div class="filtersRow">
+          <div class="filterGroup">
+            <label>Data Início</label>
+            <input type="date" id="filtDataIni">
+          </div>
+          <div class="filterGroup">
+            <label>Data Fim</label>
+            <input type="date" id="filtDataFim">
+          </div>
+          <div class="filterGroup">
+            <label>Conselheiro</label>
+            <select id="filtConselheiro">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div class="filterGroup">
+            <label>Destino</label>
+            <input type="text" id="filtDestino" placeholder="Buscar destino…">
+          </div>
+          <button class="btnFilter" onclick="renderTable()">🔍 Filtrar</button>
+          <button class="btnFilter" style="background:var(--cinza);" onclick="clearFilters()">✖ Limpar</button>
+        </div>
+      </div>
+      <div class="card" style="padding:0;">
+        <div class="tableWrap">
+          <table id="tableMain">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Data</th>
+                <th>Saída</th>
+                <th>Retorno</th>
+                <th>Conselheiro</th>
+                <th>Destino</th>
+                <th>Finalidade</th>
+                <th>Motorista</th>
+                <th>Obs.</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyMain"></tbody>
+          </table>
+        </div>
+        <div id="emptyMain" class="emptyState" style="display:none;">
+          <div class="emptyIcon">📭</div>
+          <p>Nenhum registro encontrado com os filtros selecionados.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: RELATÓRIO PDF -->
+    <div id="tabContent-relatorio" style="display:none;">
+      <div class="card">
+        <div class="cardTitle"><span>📄</span> Gerar Relatório em PDF</div>
+        <div class="filtersRow">
+          <div class="filterGroup">
+            <label>Data Início</label>
+            <input type="date" id="rDataIni">
+          </div>
+          <div class="filterGroup">
+            <label>Data Fim</label>
+            <input type="date" id="rDataFim">
+          </div>
+          <div class="filterGroup">
+            <label>Conselheiro</label>
+            <select id="rConselheiro">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div class="filterGroup">
+            <label>Destino</label>
+            <input type="text" id="rDestino" placeholder="Filtrar por destino…">
+          </div>
+          <button class="btnPDF" onclick="generatePDF()">⬇️ Baixar PDF</button>
+        </div>
+        <div class="dividerLine"></div>
+        <p class="infoNote">O relatório incluirá o cabeçalho oficial do Conselho Tutelar XIII e todos os registros filtrados. O arquivo será gerado e baixado automaticamente.</p>
+      </div>
+
+      <div class="card">
+        <div class="cardTitle"><span>👁️</span> Pré-visualização dos Dados</div>
+        <div class="tableWrap">
+          <table id="tablePreview">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Data</th>
+                <th>Saída</th>
+                <th>Retorno</th>
+                <th>Conselheiro</th>
+                <th>Destino</th>
+                <th>Finalidade</th>
+                <th>Observações</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyPreview"></tbody>
+          </table>
+        </div>
+        <div id="emptyPreview" class="emptyState" style="display:none;">
+          <div class="emptyIcon">📭</div>
+          <p>Nenhum dado disponível para os filtros selecionados.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDIÇÃO -->
+<div class="modalOverlay" id="modalEdit">
+  <div class="modalBox">
+    <div class="modalTitle"><span>✏️</span> Editar Registro</div>
+    <input type="hidden" id="meditId">
+    <div class="formGrid">
+      <div class="formGroup">
+        <label>Data *</label>
+        <input type="date" id="mData">
+      </div>
+      <div class="formGroup">
+        <label>Hora de Saída *</label>
+        <input type="time" id="mHoraSaida">
+      </div>
+      <div class="formGroup">
+        <label>Hora de Retorno</label>
+        <input type="time" id="mHoraRetorno">
+      </div>
+      <div class="formGroup">
+        <label>Conselheiro *</label>
+        <select id="mConselheiro" disabled></select>
+      </div>
+      <div class="formGroup">
+        <label>Motorista</label>
+        <input type="text" id="mMotorista" value="Joseílton Teixeira" readonly>
+      </div>
+      <div class="formGroup full">
+        <label>Destino *</label>
+        <input type="text" id="mDestino">
+      </div>
+      <div class="formGroup full">
+        <label>Finalidade *</label>
+        <input type="text" id="mFinalidade">
+      </div>
+      <div class="formGroup full">
+        <label>Observações</label>
+        <textarea id="mObservacoes"></textarea>
+      </div>
+    </div>
+    <div class="btnRow">
+      <button class="btnSave" onclick="saveEdit()">💾 Salvar Alterações</button>
+      <button class="btnCancel" onclick="closeModal()">✖ Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ============================================================
+// DATA LAYER
+// ============================================================
+const USERS = {
+  'regiane':  { name: 'Regiane Santos',   role: 'conselheiro', pass: 'ct13@regiane' },
+  'fabio':    { name: 'Fábio Barreto',    role: 'conselheiro', pass: 'ct13@fabio' },
+  'alex':     { name: 'Alex Teles',       role: 'conselheiro', pass: 'ct13@alex' },
+  'joilsom':  { name: 'Joilsom Souza',    role: 'conselheiro', pass: 'ct13@joilsom' },
+  'jailton':  { name: 'Jaílton Santana',  role: 'conselheiro', pass: 'ct13@jailton' },
+  'jamilton': { name: 'Jamilton',         role: 'secretario',  pass: 'ct13@secretario' }
+};
+
+const CONSELHEIROS = [
+  'Regiane Santos','Fábio Barreto','Alex Teles','Joilsom Souza','Jaílton Santana'
+];
+const MOTORISTA = 'Joseílton Teixeira';
+
+let currentUser = null;
+let records = JSON.parse(localStorage.getItem('ct13_records') || '[]');
+let nextId = parseInt(localStorage.getItem('ct13_nextId') || '1');
+
+function saveData() {
+  localStorage.setItem('ct13_records', JSON.stringify(records));
+  localStorage.setItem('ct13_nextId', String(nextId));
+}
+
+// ============================================================
+// AUTH
+// ============================================================
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim().toLowerCase();
+  const p = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginError');
+
+  if (!u || !p) { err.textContent = 'Preencha usuário e senha.'; return; }
+  const user = USERS[u];
+  if (!user || user.pass !== p) {
+    err.textContent = '❌ Usuário ou senha incorretos.'; return;
+  }
+  currentUser = { login: u, ...user };
+  err.textContent = '';
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'block';
+  document.getElementById('userBadge').textContent = '👤 ' + currentUser.name +
+    (currentUser.role === 'secretario' ? ' (Secretário)' : '');
+  initSelects();
+  showTab('painel');
+}
+
+document.getElementById('loginPass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+function doLogout() {
+  currentUser = null;
+  document.getElementById('appScreen').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+}
+
+// ============================================================
+// INIT SELECTS
+// ============================================================
+function initSelects() {
+  const ids = ['fConselheiro','filtConselheiro','rConselheiro','mConselheiro'];
+  ids.forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    // clear options (keep first)
+    while (sel.options.length > 1) sel.remove(1);
+    CONSELHEIROS.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c; opt.textContent = c;
+      sel.appendChild(opt);
+    });
+  });
+
+  // If conselheiro, pre-fill and lock the field in new record form
+  if (currentUser.role === 'conselheiro') {
+    const fC = document.getElementById('fConselheiro');
+    fC.value = currentUser.name;
+    fC.disabled = true;
+  } else {
+    document.getElementById('fConselheiro').disabled = false;
+  }
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function showTab(name) {
+  ['painel','registro','registros','relatorio'].forEach(t => {
+    document.getElementById('tabContent-'+t).style.display = t === name ? 'block' : 'none';
+    document.getElementById('tab-'+t).classList.toggle('active', t === name);
+  });
+  if (name === 'painel') renderPainel();
+  if (name === 'registros') renderTable();
+  if (name === 'relatorio') renderPreview();
+  if (name === 'registro') setTodayDate();
+}
+
+function setTodayDate() {
+  const d = document.getElementById('fData');
+  if (!d.value) d.value = new Date().toISOString().slice(0,10);
+  const t = document.getElementById('fHoraSaida');
+  if (!t.value) {
+    const now = new Date();
+    t.value = now.toTimeString().slice(0,5);
+  }
+}
+
+// ============================================================
+// CRUD
+// ============================================================
+function saveRecord() {
+  const data       = document.getElementById('fData').value;
+  const horaSaida  = document.getElementById('fHoraSaida').value;
+  const horaRet    = document.getElementById('fHoraRetorno').value;
+  const conselheiro= document.getElementById('fConselheiro').value;
+  const destino    = document.getElementById('fDestino').value.trim();
+  const finalidade = document.getElementById('fFinalidade').value.trim();
+  const obs        = document.getElementById('fObservacoes').value.trim();
+
+  if (!data || !horaSaida || !conselheiro || !destino || !finalidade) {
+    showToast('Preencha todos os campos obrigatórios (*).', 'error'); return;
+  }
+
+  // Validate date is weekday 08-20
+  const dateObj = new Date(data + 'T' + horaSaida);
+  const dow = new Date(data).getUTCDay(); // 0=Sun 6=Sat
+  if (dow === 0 || dow === 6) {
+    showToast('⚠️ A agenda é de segunda a sexta-feira.', 'error'); return;
+  }
+  const h = parseInt(horaSaida.split(':')[0]);
+  if (h < 8 || h >= 20) {
+    showToast('⚠️ O horário deve ser entre 08h e 20h.', 'error'); return;
+  }
+
+  const rec = {
+    id: nextId++,
+    data, horaSaida, horaRet,
+    conselheiro,
+    motorista: MOTORISTA,
+    destino, finalidade, obs,
+    criadoPor: currentUser.login,
+    criadoEm: new Date().toISOString()
+  };
+  records.unshift(rec);
+  saveData();
+  clearForm();
+  showToast('✅ Registro salvo com sucesso!', 'success');
+  showTab('registros');
+}
+
+function clearForm() {
+  ['fData','fHoraSaida','fHoraRetorno','fDestino','fFinalidade','fObservacoes']
+    .forEach(id => document.getElementById(id).value = '');
+  if (currentUser.role === 'secretario') document.getElementById('fConselheiro').value = '';
+}
+
+function cancelEdit() {
+  clearForm();
+  showTab('registros');
+}
+
+function deleteRecord(id) {
+  const rec = records.find(r => r.id === id);
+  if (!rec) return;
+  if (!canManage(rec)) { showToast('❌ Sem permissão para excluir este registro.', 'error'); return; }
+  if (!confirm('Deseja realmente excluir este registro?')) return;
+  records = records.filter(r => r.id !== id);
+  saveData();
+  renderTable();
+  renderPainel();
+  showToast('🗑️ Registro excluído.', 'success');
+}
+
+function openEdit(id) {
+  const rec = records.find(r => r.id === id);
+  if (!rec) return;
+  if (!canManage(rec)) { showToast('❌ Sem permissão para editar este registro.', 'error'); return; }
+  document.getElementById('meditId').value = id;
+  document.getElementById('mData').value = rec.data;
+  document.getElementById('mHoraSaida').value = rec.horaSaida;
+  document.getElementById('mHoraRetorno').value = rec.horaRet || '';
+  document.getElementById('mConselheiro').value = rec.conselheiro;
+  document.getElementById('mMotorista').value = rec.motorista;
+  document.getElementById('mDestino').value = rec.destino;
+  document.getElementById('mFinalidade').value = rec.finalidade;
+  document.getElementById('mObservacoes').value = rec.obs || '';
+  document.getElementById('modalEdit').classList.add('open');
+}
+
+function saveEdit() {
+  const id = parseInt(document.getElementById('meditId').value);
+  const idx = records.findIndex(r => r.id === id);
+  if (idx < 0) return;
+
+  const data        = document.getElementById('mData').value;
+  const horaSaida   = document.getElementById('mHoraSaida').value;
+  const horaRet     = document.getElementById('mHoraRetorno').value;
+  const destino     = document.getElementById('mDestino').value.trim();
+  const finalidade  = document.getElementById('mFinalidade').value.trim();
+  const obs         = document.getElementById('mObservacoes').value.trim();
+
+  if (!data || !horaSaida || !destino || !finalidade) {
+    showToast('Preencha os campos obrigatórios.', 'error'); return;
+  }
+
+  records[idx] = { ...records[idx], data, horaSaida, horaRet, destino, finalidade, obs,
+    editadoEm: new Date().toISOString() };
+  saveData();
+  closeModal();
+  renderTable();
+  renderPainel();
+  showToast('✅ Registro atualizado!', 'success');
+}
+
+function closeModal() {
+  document.getElementById('modalEdit').classList.remove('open');
+}
+
+function canManage(rec) {
+  if (!currentUser) return false;
+  if (currentUser.role === 'secretario') return true;
+  return rec.criadoPor === currentUser.login;
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function fmtDate(s) {
+  if (!s) return '–';
+  const [y,m,d] = s.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function getFiltered(ini, fim, conselheiro, destino) {
+  return records.filter(r => {
+    if (ini && r.data < ini) return false;
+    if (fim && r.data > fim) return false;
+    if (conselheiro && r.conselheiro !== conselheiro) return false;
+    if (destino && !r.destino.toLowerCase().includes(destino.toLowerCase())) return false;
+    return true;
+  });
+}
+
+function renderPainel() {
+  // Stats
+  const statsRow = document.getElementById('statsRow');
+  const total = records.length;
+  const hoje = new Date().toISOString().slice(0,10);
+  const thisMonth = hoje.slice(0,7);
+  const mes = records.filter(r => r.data && r.data.startsWith(thisMonth)).length;
+  const consSet = new Set(records.map(r => r.conselheiro)).size;
+  const destSet = new Set(records.map(r => r.destino)).size;
+  statsRow.innerHTML = `
+    <div class="statCard"><div class="statValue">${total}</div><div class="statLabel">Total de Registros</div></div>
+    <div class="statCard gold"><div class="statValue">${mes}</div><div class="statLabel">Registros no Mês</div></div>
+    <div class="statCard green"><div class="statValue">${consSet}</div><div class="statLabel">Conselheiros Ativos</div></div>
+    <div class="statCard orange"><div class="statValue">${destSet}</div><div class="statLabel">Destinos Únicos</div></div>
+  `;
+  // Recent
+  const tbody = document.getElementById('tbodyRecent');
+  const recent = records.slice(0, 10);
+  if (!recent.length) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--cinza);padding:24px;">Nenhum registro ainda.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = recent.map(r => `
+    <tr>
+      <td><span style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;">${fmtDate(r.data)} ${r.horaSaida}</span></td>
+      <td>${r.conselheiro}</td>
+      <td>${r.destino}</td>
+      <td>${r.finalidade}</td>
+      <td>${r.obs ? r.obs.slice(0,50)+(r.obs.length>50?'…':'') : '–'}</td>
+    </tr>
+  `).join('');
+}
+
+function renderTable() {
+  const ini  = document.getElementById('filtDataIni').value;
+  const fim  = document.getElementById('filtDataFim').value;
+  const cons = document.getElementById('filtConselheiro').value;
+  const dest = document.getElementById('filtDestino').value;
+  const data = getFiltered(ini, fim, cons, dest);
+
+  const tbody = document.getElementById('tbodyMain');
+  const empty = document.getElementById('emptyMain');
+
+  if (!data.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  tbody.innerHTML = data.map((r,i) => {
+    const mine = canManage(r);
+    return `<tr>
+      <td><span style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;">${r.id}</span></td>
+      <td>${fmtDate(r.data)}</td>
+      <td>${r.horaSaida}</td>
+      <td>${r.horaRet || '–'}</td>
+      <td><span class="badge badgeAzul">${r.conselheiro}</span></td>
+      <td>${r.destino}</td>
+      <td>${r.finalidade}</td>
+      <td>${r.motorista}</td>
+      <td>${r.obs ? r.obs.slice(0,40)+(r.obs.length>40?'…':'') : '–'}</td>
+      <td>
+        <div class="actBtns">
+          ${mine
+            ? `<button class="btnEdit" onclick="openEdit(${r.id})">✏️ Editar</button>
+               <button class="btnDel" onclick="deleteRecord(${r.id})">🗑️ Excluir</button>`
+            : `<span class="btnDisabled">🔒 Sem acesso</span>`
+          }
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderPreview() {
+  const ini  = document.getElementById('rDataIni').value;
+  const fim  = document.getElementById('rDataFim').value;
+  const cons = document.getElementById('rConselheiro').value;
+  const dest = document.getElementById('rDestino').value;
+  const data = getFiltered(ini, fim, cons, dest);
+
+  const tbody = document.getElementById('tbodyPreview');
+  const empty = document.getElementById('emptyPreview');
+
+  if (!data.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  tbody.innerHTML = data.map((r,i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td>${fmtDate(r.data)}</td>
+      <td>${r.horaSaida}</td>
+      <td>${r.horaRet || '–'}</td>
+      <td>${r.conselheiro}</td>
+      <td>${r.destino}</td>
+      <td>${r.finalidade}</td>
+      <td>${r.obs || '–'}</td>
+    </tr>
+  `).join('');
+}
+
+function clearFilters() {
+  ['filtDataIni','filtDataFim','filtDestino'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('filtConselheiro').value = '';
+  renderTable();
+}
+
+// ============================================================
+// PDF
+// ============================================================
+function generatePDF() {
+  const ini  = document.getElementById('rDataIni').value;
+  const fim  = document.getElementById('rDataFim').value;
+  const cons = document.getElementById('rConselheiro').value;
+  const dest = document.getElementById('rDestino').value;
+  const data = getFiltered(ini, fim, cons, dest);
+
+  if (!data.length) {
+    showToast('⚠️ Nenhum dado para gerar relatório.', 'error'); return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+  const pageW = doc.internal.pageSize.getWidth();
+  const margin = 14;
+
+  // ── HEADER ──
+  doc.setFillColor(26, 58, 92);
+  doc.rect(0, 0, pageW, 38, 'F');
+
+  // Adiciona a Logo ao PDF de forma elegante e com fundo de destaque
+  const imgEl = document.getElementById('topbarLogoImg') || document.getElementById('loginLogoImg');
+  let hasLogo = false;
+  if (imgEl && imgEl.complete && imgEl.naturalWidth !== 0) {
+    try {
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(16, 4, 30, 30, 2, 2, 'F'); // Fundo branco arredondado para a logo se destacar
+      doc.addImage(imgEl, 'PNG', 17, 5, 28, 28);
+      hasLogo = true;
+    } catch (err) {
+      console.error('Erro ao renderizar logo no PDF:', err);
+    }
+  }
+
+  // Ajusta o alinhamento horizontal se a logo estiver presente para manter o equilíbrio visual
+  const textX = hasLogo ? (pageW / 2 + 12) : (pageW / 2);
+
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(11);
+  doc.text('CONSELHO TUTELAR XIII DA CRIANÇA E DO ADOLESCENTE DE SALVADOR', textX, 10, { align:'center' });
+
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(8.5);
+  doc.text('LEI FEDERAL: 8.069/90  –  LEI MUNICIPAL: 6.266/03', textX, 17, { align:'center' });
+  doc.text('Av. Edgar Santos, 511, Centro Social Urbano, Narandiba  –  Tel. 3202-7363', textX, 23, { align:'center' });
+  doc.text('conselho.narandiba@salvador.ba.gov.br', textX, 29, { align:'center' });
+
+  // Linha dourada
+  doc.setDrawColor(201,168,76);
+  doc.setLineWidth(1.2);
+  doc.line(margin, 38, pageW-margin, 38);
+
+  // ── TÍTULO RELATÓRIO ──
+  doc.setTextColor(26,58,92);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(12);
+  doc.text('RELATÓRIO DE ROTEIRO DE VEÍCULO', pageW/2, 47, { align:'center' });
+
+  // Sub-info filtros
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(8);
+  doc.setTextColor(80,80,80);
+  let filtroInfo = 'Período: ' + (ini ? fmtDate(ini) : 'início') + ' a ' + (fim ? fmtDate(fim) : 'atual');
+  if (cons) filtroInfo += '   |   Conselheiro: ' + cons;
+  if (dest) filtroInfo += '   |   Destino: ' + dest;
+  doc.text(filtroInfo, pageW/2, 53, { align:'center' });
+  doc.text('Motorista Fixo: Joseílton Teixeira   |   Gerado em: ' + new Date().toLocaleString('pt-BR'), pageW/2, 58, { align:'center' });
+
+  // ── TABELA ──
+  const rows = data.map((r, i) => [
+    i+1,
+    fmtDate(r.data),
+    r.horaSaida,
+    r.horaRet || '–',
+    r.conselheiro,
+    r.destino,
+    r.finalidade,
+    r.motorista,
+    r.obs || '–'
+  ]);
+
+  doc.autoTable({
+    startY: 63,
+    head: [['#','Data','Saída','Retorno','Conselheiro','Destino','Finalidade','Motorista','Observações']],
+    body: rows,
+    styles: {
+      fontSize: 7.5,
+      cellPadding: 3,
+      overflow: 'linebreak',
+      font: 'helvetica',
+    },
+    headStyles: {
+      fillColor: [26,58,92],
+      textColor: 255,
+      fontStyle: 'bold',
+      fontSize: 7.5,
+    },
+    alternateRowStyles: { fillColor: [248,244,237] },
+    columnStyles: {
+      0: { cellWidth: 8, halign:'center' },
+      1: { cellWidth: 22 },
+      2: { cellWidth: 16, halign:'center' },
+      3: { cellWidth: 16, halign:'center' },
+      4: { cellWidth: 32 },
+      5: { cellWidth: 40 },
+      6: { cellWidth: 50 },
+      7: { cellWidth: 32 },
+      8: { cellWidth: 'auto' }
+    },
+    margin: { left: margin, right: margin },
+    didDrawPage: (hookData) => {
+      // Footer
+      const pgs = doc.internal.getNumberOfPages();
+      doc.setFontSize(7);
+      doc.setTextColor(140,140,140);
+      doc.text(`Página ${hookData.pageNumber}`, pageW/2, doc.internal.pageSize.getHeight()-6, { align:'center' });
+      doc.text('Conselho Tutelar XIII – Narandiba – Salvador/BA', margin, doc.internal.pageSize.getHeight()-6);
+      doc.text('Sistema de Roteiro de Veículo', pageW-margin, doc.internal.pageSize.getHeight()-6, { align:'right' });
+    }
+  });
+
+  // ── ASSINATURAS ──
+  const finalY = doc.lastAutoTable.finalY + 18;
+  const pageH = doc.internal.pageSize.getHeight();
+  if (finalY + 30 < pageH) {
+    doc.setTextColor(26,58,92);
+    doc.setFontSize(8);
+    doc.setFont('helvetica','normal');
+    const sigW = (pageW - margin*2) / 3;
+    const sigY = finalY + 18;
+    [['Motorista','Joseílton Teixeira'], ['Responsável pela Viagem',''], ['Coordenação CT XIII','']].forEach((s, idx) => {
+      const x = margin + idx * sigW + sigW/2;
+      doc.line(x-25, sigY, x+25, sigY);
+      doc.text(s[0], x, sigY+5, { align:'center' });
+      if (s[1]) doc.text(s[1], x, sigY+10, { align:'center' });
+    });
+  }
+
+  const fname = 'roteiro_ct13_' + new Date().toISOString().slice(0,10) + '.pdf';
+  doc.save(fname);
+  showToast('📄 PDF gerado: ' + fname, 'success');
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.className = ''; }, 3200);
+}
+
+// ============================================================
+// CLICK OUTSIDE MODAL
+// ============================================================
+document.getElementById('modalEdit').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// Report preview live update
+['rDataIni','rDataFim','rConselheiro','rDestino'].forEach(id => {
+  document.getElementById(id).addEventListener('change', renderPreview);
+  document.getElementById(id).addEventListener('input', renderPreview);
+});
+
+// ============================================================
+// DEMO DATA (seed if empty)
+// ============================================================
+(function seedDemo() {
+  if (records.length > 0) return;
+  const demos = [
+    { data:'2025-05-05', horaSaida:'08:30', horaRet:'11:00', conselheiro:'Regiane Santos', destino:'CREAS Narandiba', finalidade:'Atendimento a família em vulnerabilidade', obs:'Reunião com assistente social', criadoPor:'regiane' },
+    { data:'2025-05-05', horaSaida:'13:00', horaRet:'16:30', conselheiro:'Fábio Barreto', destino:'Hospital Irmã Dulce', finalidade:'Acompanhamento de criança hospitalizada', obs:'', criadoPor:'fabio' },
+    { data:'2025-05-06', horaSaida:'09:00', horaRet:'12:00', conselheiro:'Alex Teles', destino:'Escola Municipal de Narandiba', finalidade:'Denúncia de evasão escolar', obs:'Conversa com direção da escola', criadoPor:'alex' },
+    { data:'2025-05-07', horaSaida:'14:00', horaRet:'17:00', conselheiro:'Joilsom Souza', destino:'Delegacia de Menores', finalidade:'Acompanhamento de adolescente em conflito', obs:'', criadoPor:'joilsom' },
+    { data:'2025-05-08', horaSaida:'08:00', horaRet:'10:30', conselheiro:'Jaílton Santana', destino:'SEMPS – Sede', finalidade:'Reunião de alinhamento', obs:'Parada intermediária no CAPS', criadoPor:'jailton' },
+  ];
+  demos.forEach(d => {
+    records.unshift({ id: nextId++, motorista: MOTORISTA, criadoEm: new Date().toISOString(), ...d });
+  });
+  saveData();
+})();
+</script>
+</body>
+</html>
