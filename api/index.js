@@ -19,7 +19,12 @@ app.get('/api/registros', async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Erro ao buscar registros' });
+    res.status(500).json({ 
+      error: 'Erro ao buscar registros', 
+      details: err.message, 
+      has_db_url: !!process.env.DATABASE_URL,
+      has_postgres_url: !!process.env.POSTGRES_URL
+    });
   }
 });
 
