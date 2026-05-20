@@ -266,6 +266,21 @@
     font-size: 0.78rem;
     font-weight: 500;
   }
+  .btnConfig {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: var(--branco);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-family: 'Sora', sans-serif;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .btnConfig:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: var(--ouro);
+  }
   .btnLogout {
     background: rgba(255,255,255,0.1);
     border: 1px solid rgba(255,255,255,0.25);
@@ -670,6 +685,7 @@
     </div>
     <div class="topbarRight">
       <div class="userBadge" id="userBadge">👤 Usuário</div>
+      <button class="btnConfig" onclick="openConfigModal()">⚙️ Configurações</button>
       <button class="btnLogout" onclick="doLogout()">Sair</button>
     </div>
   </div>
@@ -896,13 +912,38 @@
   </div>
 </div>
 
+<!-- MODAL CONFIGURAÇÕES DO USUÁRIO -->
+<div class="modalOverlay" id="modalConfig">
+  <div class="modalBox">
+    <div class="modalTitle"><span>⚙️</span> Configurações de Usuário</div>
+    <div class="formGrid" style="margin-top: 15px;">
+      <div class="formGroup">
+        <label>Nome Completo *</label>
+        <input type="text" id="cfgName" placeholder="Seu nome completo">
+      </div>
+      <div class="formGroup">
+        <label>Nome de Usuário (Login) *</label>
+        <input type="text" id="cfgUsername" placeholder="Nome de usuário para login">
+      </div>
+      <div class="formGroup">
+        <label>Senha *</label>
+        <input type="password" id="cfgPass" placeholder="Nova senha">
+      </div>
+    </div>
+    <div class="btnRow" style="margin-top: 20px;">
+      <button class="btnSave" onclick="saveUserConfig()">💾 Salvar</button>
+      <button class="btnCancel" onclick="closeConfigModal()">✖ Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
 // ============================================================
 // DATA LAYER
 // ============================================================
-const USERS = {
+let USERS = JSON.parse(localStorage.getItem('ct13_users')) || {
   'regiane':  { name: 'Regiane Santos',   role: 'conselheiro', pass: 'ct13@regiane' },
   'fabio':    { name: 'Fábio Barreto',    role: 'conselheiro', pass: 'ct13@fabio' },
   'alex':     { name: 'Alex Teles',       role: 'conselheiro', pass: 'ct13@alex' },
@@ -911,9 +952,14 @@ const USERS = {
   'jamilton': { name: 'Jamilton',         role: 'secretario',  pass: 'ct13@secretario' }
 };
 
-const CONSELHEIROS = [
-  'Regiane Santos','Fábio Barreto','Alex Teles','Joilsom Souza','Jaílton Santana'
-];
+let CONSELHEIROS = [];
+function updateConselheirosList() {
+  CONSELHEIROS = Object.values(USERS)
+    .filter(u => u.role === 'conselheiro')
+    .map(u => u.name);
+}
+updateConselheirosList();
+
 const MOTORISTA = 'Joseílton Teixeira';
 
 const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000/api' : '/api';
@@ -936,7 +982,8 @@ async function loadData() {
           conselheiro: r.conselheiro,
           motorista: r.motorista,
           destino: r.destino,
-          obs: r.observacoes || ''
+          obs: r.observacoes || '',
+          criadoPor: r.criado_por
         };
       });
       renderTable();
@@ -1055,7 +1102,8 @@ async function saveRecord() {
 
   const payload = {
     data, turno,
-    conselheiro, motorista: MOTORISTA, destino, observacoes: obs
+    conselheiro, motorista: MOTORISTA, destino, observacoes: obs,
+    criado_por: currentUser.login
   };
   
   try {
@@ -1167,6 +1215,72 @@ function canManage(rec) {
   if (!currentUser) return false;
   if (currentUser.role === 'secretario') return true;
   return rec.criadoPor === currentUser.login;
+}
+
+// ============================================================
+// CONFIGURAÇÕES DE USUÁRIO
+// ============================================================
+function openConfigModal() {
+  if (!currentUser) return;
+  document.getElementById('cfgName').value = currentUser.name;
+  document.getElementById('cfgUsername').value = currentUser.login;
+  document.getElementById('cfgPass').value = currentUser.pass;
+  document.getElementById('modalConfig').classList.add('open');
+}
+
+function closeConfigModal() {
+  document.getElementById('modalConfig').classList.remove('open');
+}
+
+async function saveUserConfig() {
+  const newName = document.getElementById('cfgName').value.trim();
+  const newLogin = document.getElementById('cfgUsername').value.trim().toLowerCase();
+  const newPass = document.getElementById('cfgPass').value;
+
+  if (!newName || !newLogin || !newPass) {
+    showToast('❌ Preencha todos os campos obrigatórios.', 'error');
+    return;
+  }
+
+  const oldLogin = currentUser.login;
+
+  if (newLogin !== oldLogin && USERS[newLogin]) {
+    showToast('❌ Esse nome de usuário já está em uso.', 'error');
+    return;
+  }
+
+  const updatedUser = {
+    name: newName,
+    role: currentUser.role,
+    pass: newPass
+  };
+
+  if (newLogin !== oldLogin) {
+    delete USERS[oldLogin];
+  }
+  USERS[newLogin] = updatedUser;
+
+  localStorage.setItem('ct13_users', JSON.stringify(USERS));
+
+  currentUser.login = newLogin;
+  currentUser.name = newName;
+  currentUser.pass = newPass;
+
+  updateConselheirosList();
+
+  document.getElementById('userBadge').textContent = '👤 ' + currentUser.name +
+    (currentUser.role === 'secretario' ? ' (Secretário)' : '');
+
+  if (currentUser.role === 'conselheiro') {
+    const fC = document.getElementById('fConselheiro');
+    if (fC) fC.value = currentUser.name;
+  }
+
+  initSelects();
+  await loadData();
+
+  closeConfigModal();
+  showToast('✅ Configurações salvas com sucesso!', 'success');
 }
 
 // ============================================================
@@ -1453,6 +1567,9 @@ function showToast(msg, type='') {
 // ============================================================
 document.getElementById('modalEdit').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
+});
+document.getElementById('modalConfig').addEventListener('click', function(e) {
+  if (e.target === this) closeConfigModal();
 });
 
 // Report preview live update

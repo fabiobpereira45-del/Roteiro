@@ -16,6 +16,7 @@ CREATE TABLE registros (
   motorista VARCHAR(255) NOT NULL,
   destino VARCHAR(255) NOT NULL,
   observacoes TEXT,
+  criado_por VARCHAR(50) NOT NULL,
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 `;

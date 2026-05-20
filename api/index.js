@@ -25,12 +25,12 @@ app.get('/api/registros', async (req, res) => {
 
 // POST /api/registros - Criar novo registro
 app.post('/api/registros', async (req, res) => {
-  const { data, turno, conselheiro, motorista, destino, observacoes } = req.body;
+  const { data, turno, conselheiro, motorista, destino, observacoes, criado_por } = req.body;
   try {
     const result = await pool.query(
-      `INSERT INTO registros (data, turno, conselheiro, motorista, destino, observacoes)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [data, turno, conselheiro, motorista, destino, observacoes]
+      `INSERT INTO registros (data, turno, conselheiro, motorista, destino, observacoes, criado_por)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [data, turno, conselheiro, motorista, destino, observacoes, criado_por || 'system']
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
