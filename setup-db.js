@@ -7,15 +7,14 @@ const pool = new Pool({
 });
 
 const createTableQuery = `
-CREATE TABLE IF NOT EXISTS registros (
+DROP TABLE IF EXISTS registros;
+CREATE TABLE registros (
   id SERIAL PRIMARY KEY,
   data DATE NOT NULL,
-  hora_saida TIME NOT NULL,
-  hora_retorno TIME,
+  turno VARCHAR(50) NOT NULL,
   conselheiro VARCHAR(255) NOT NULL,
   motorista VARCHAR(255) NOT NULL,
   destino VARCHAR(255) NOT NULL,
-  finalidade VARCHAR(255) NOT NULL,
   observacoes TEXT,
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

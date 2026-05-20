@@ -692,10 +692,9 @@
           <table id="tableRecent">
             <thead>
               <tr>
-                <th>Data/Hora</th>
+                <th>Data / Turno</th>
                 <th>Conselheiro</th>
                 <th>Destino</th>
-                <th>Finalidade</th>
                 <th>Obs.</th>
               </tr>
             </thead>
@@ -716,12 +715,11 @@
             <input type="date" id="fData">
           </div>
           <div class="formGroup">
-            <label>Hora de Saída *</label>
-            <input type="time" id="fHoraSaida">
-          </div>
-          <div class="formGroup">
-            <label>Hora de Retorno</label>
-            <input type="time" id="fHoraRetorno">
+            <label>Turno *</label>
+            <select id="fTurno">
+              <option value="Manhã">Manhã</option>
+              <option value="Tarde">Tarde</option>
+            </select>
           </div>
           <div class="formGroup">
             <label>Conselheiro *</label>
@@ -736,10 +734,6 @@
           <div class="formGroup full">
             <label>Destino *</label>
             <input type="text" id="fDestino" placeholder="Ex: CREAS Narandiba, UPA Cajazeiras, Sede da SEMPS…">
-          </div>
-          <div class="formGroup full">
-            <label>Finalidade / Motivo da Visita *</label>
-            <input type="text" id="fFinalidade" placeholder="Descreva o objetivo do deslocamento">
           </div>
           <div class="formGroup full">
             <label>Observações</label>
@@ -788,11 +782,9 @@
               <tr>
                 <th>#</th>
                 <th>Data</th>
-                <th>Saída</th>
-                <th>Retorno</th>
+                <th>Turno</th>
                 <th>Conselheiro</th>
                 <th>Destino</th>
-                <th>Finalidade</th>
                 <th>Motorista</th>
                 <th>Obs.</th>
                 <th>Ações</th>
@@ -845,11 +837,9 @@
               <tr>
                 <th>#</th>
                 <th>Data</th>
-                <th>Saída</th>
-                <th>Retorno</th>
+                <th>Turno</th>
                 <th>Conselheiro</th>
                 <th>Destino</th>
-                <th>Finalidade</th>
                 <th>Observações</th>
               </tr>
             </thead>
@@ -876,12 +866,11 @@
         <input type="date" id="mData">
       </div>
       <div class="formGroup">
-        <label>Hora de Saída *</label>
-        <input type="time" id="mHoraSaida">
-      </div>
-      <div class="formGroup">
-        <label>Hora de Retorno</label>
-        <input type="time" id="mHoraRetorno">
+        <label>Turno *</label>
+        <select id="mTurno">
+          <option value="Manhã">Manhã</option>
+          <option value="Tarde">Tarde</option>
+        </select>
       </div>
       <div class="formGroup">
         <label>Conselheiro *</label>
@@ -894,10 +883,6 @@
       <div class="formGroup full">
         <label>Destino *</label>
         <input type="text" id="mDestino">
-      </div>
-      <div class="formGroup full">
-        <label>Finalidade *</label>
-        <input type="text" id="mFinalidade">
       </div>
       <div class="formGroup full">
         <label>Observações</label>
@@ -943,20 +928,14 @@ async function loadData() {
       records = dbRecords.map(r => {
         let d = r.data;
         if (d && d.includes('T')) d = d.split('T')[0];
-        let hs = r.hora_saida;
-        if (hs && hs.length > 5) hs = hs.substring(0,5);
-        let hr = r.hora_retorno;
-        if (hr && hr.length > 5) hr = hr.substring(0,5);
         
         return {
           id: r.id,
           data: d,
-          horaSaida: hs,
-          horaRet: hr || '',
+          turno: r.turno,
           conselheiro: r.conselheiro,
           motorista: r.motorista,
           destino: r.destino,
-          finalidade: r.finalidade,
           obs: r.observacoes || ''
         };
       });
@@ -1050,11 +1029,8 @@ function showTab(name) {
 function setTodayDate() {
   const d = document.getElementById('fData');
   if (!d.value) d.value = new Date().toISOString().slice(0,10);
-  const t = document.getElementById('fHoraSaida');
-  if (!t.value) {
-    const now = new Date();
-    t.value = now.toTimeString().slice(0,5);
-  }
+  const t = document.getElementById('fTurno');
+  if (!t.value) t.value = 'Manhã';
 }
 
 // ============================================================
@@ -1062,31 +1038,24 @@ function setTodayDate() {
 // ============================================================
 async function saveRecord() {
   const data       = document.getElementById('fData').value;
-  const horaSaida  = document.getElementById('fHoraSaida').value;
-  const horaRet    = document.getElementById('fHoraRetorno').value;
+  const turno      = document.getElementById('fTurno').value;
   const conselheiro= document.getElementById('fConselheiro').value;
   const destino    = document.getElementById('fDestino').value.trim();
-  const finalidade = document.getElementById('fFinalidade').value.trim();
   const obs        = document.getElementById('fObservacoes').value.trim();
 
-  if (!data || !horaSaida || !conselheiro || !destino || !finalidade) {
+  if (!data || !turno || !conselheiro || !destino) {
     showToast('Preencha todos os campos obrigatórios (*).', 'error'); return;
   }
 
-  // Validate date is weekday 08-20
-  const dateObj = new Date(data + 'T' + horaSaida);
+  // Valida se o dia é de segunda a sexta-feira
   const dow = new Date(data).getUTCDay(); // 0=Sun 6=Sat
   if (dow === 0 || dow === 6) {
     showToast('⚠️ A agenda é de segunda a sexta-feira.', 'error'); return;
   }
-  const h = parseInt(horaSaida.split(':')[0]);
-  if (h < 8 || h >= 20) {
-    showToast('⚠️ O horário deve ser entre 08h e 20h.', 'error'); return;
-  }
 
   const payload = {
-    data, hora_saida: horaSaida, hora_retorno: horaRet,
-    conselheiro, motorista: MOTORISTA, destino, finalidade, observacoes: obs
+    data, turno,
+    conselheiro, motorista: MOTORISTA, destino, observacoes: obs
   };
   
   try {
@@ -1109,8 +1078,9 @@ async function saveRecord() {
 }
 
 function clearForm() {
-  ['fData','fHoraSaida','fHoraRetorno','fDestino','fFinalidade','fObservacoes']
+  ['fData','fDestino','fObservacoes']
     .forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fTurno').value = 'Manhã';
   if (currentUser.role === 'secretario') document.getElementById('fConselheiro').value = '';
 }
 
@@ -1141,12 +1111,10 @@ function openEdit(id) {
   if (!canManage(rec)) { showToast('❌ Sem permissão para editar este registro.', 'error'); return; }
   document.getElementById('meditId').value = id;
   document.getElementById('mData').value = rec.data;
-  document.getElementById('mHoraSaida').value = rec.horaSaida;
-  document.getElementById('mHoraRetorno').value = rec.horaRet || '';
+  document.getElementById('mTurno').value = rec.turno;
   document.getElementById('mConselheiro').value = rec.conselheiro;
   document.getElementById('mMotorista').value = rec.motorista;
   document.getElementById('mDestino').value = rec.destino;
-  document.getElementById('mFinalidade').value = rec.finalidade;
   document.getElementById('mObservacoes').value = rec.obs || '';
   document.getElementById('modalEdit').classList.add('open');
 }
@@ -1157,13 +1125,11 @@ async function saveEdit() {
   if (idx < 0) return;
 
   const data        = document.getElementById('mData').value;
-  const horaSaida   = document.getElementById('mHoraSaida').value;
-  const horaRet     = document.getElementById('mHoraRetorno').value;
+  const turno       = document.getElementById('mTurno').value;
   const destino     = document.getElementById('mDestino').value.trim();
-  const finalidade  = document.getElementById('mFinalidade').value.trim();
   const obs         = document.getElementById('mObservacoes').value.trim();
 
-  if (!data || !horaSaida || !destino || !finalidade) {
+  if (!data || !turno || !destino) {
     showToast('Preencha os campos obrigatórios.', 'error'); return;
   }
 
@@ -1171,8 +1137,8 @@ async function saveEdit() {
   const motorista   = document.getElementById('mMotorista').value;
   
   const payload = { 
-    data, hora_saida: horaSaida, hora_retorno: horaRet, 
-    conselheiro, motorista, destino, finalidade, observacoes: obs 
+    data, turno, 
+    conselheiro, motorista, destino, observacoes: obs 
   };
 
   try {
@@ -1241,15 +1207,14 @@ function renderPainel() {
   const tbody = document.getElementById('tbodyRecent');
   const recent = records.slice(0, 10);
   if (!recent.length) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--cinza);padding:24px;">Nenhum registro ainda.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--cinza);padding:24px;">Nenhum registro ainda.</td></tr>`;
     return;
   }
   tbody.innerHTML = recent.map(r => `
     <tr>
-      <td><span style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;">${fmtDate(r.data)} ${r.horaSaida}</span></td>
+      <td><span style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;">${fmtDate(r.data)} (${r.turno})</span></td>
       <td>${r.conselheiro}</td>
       <td>${r.destino}</td>
-      <td>${r.finalidade}</td>
       <td>${r.obs ? r.obs.slice(0,50)+(r.obs.length>50?'…':'') : '–'}</td>
     </tr>
   `).join('');
@@ -1276,11 +1241,9 @@ function renderTable() {
     return `<tr>
       <td><span style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;">${r.id}</span></td>
       <td>${fmtDate(r.data)}</td>
-      <td>${r.horaSaida}</td>
-      <td>${r.horaRet || '–'}</td>
+      <td>${r.turno}</td>
       <td><span class="badge badgeAzul">${r.conselheiro}</span></td>
       <td>${r.destino}</td>
-      <td>${r.finalidade}</td>
       <td>${r.motorista}</td>
       <td>${r.obs ? r.obs.slice(0,40)+(r.obs.length>40?'…':'') : '–'}</td>
       <td>
@@ -1316,11 +1279,9 @@ function renderPreview() {
     <tr>
       <td>${i+1}</td>
       <td>${fmtDate(r.data)}</td>
-      <td>${r.horaSaida}</td>
-      <td>${r.horaRet || '–'}</td>
+      <td>${r.turno}</td>
       <td>${r.conselheiro}</td>
       <td>${r.destino}</td>
-      <td>${r.finalidade}</td>
       <td>${r.obs || '–'}</td>
     </tr>
   `).join('');
@@ -1409,18 +1370,16 @@ function generatePDF() {
   const rows = data.map((r, i) => [
     i+1,
     fmtDate(r.data),
-    r.horaSaida,
-    r.horaRet || '–',
+    r.turno,
     r.conselheiro,
     r.destino,
-    r.finalidade,
     r.motorista,
     r.obs || '–'
   ]);
 
   doc.autoTable({
     startY: 63,
-    head: [['#','Data','Saída','Retorno','Conselheiro','Destino','Finalidade','Motorista','Observações']],
+    head: [['#','Data','Turno','Conselheiro','Destino','Motorista','Observações']],
     body: rows,
     styles: {
       fontSize: 7.5,
@@ -1438,13 +1397,11 @@ function generatePDF() {
     columnStyles: {
       0: { cellWidth: 8, halign:'center' },
       1: { cellWidth: 22 },
-      2: { cellWidth: 16, halign:'center' },
-      3: { cellWidth: 16, halign:'center' },
-      4: { cellWidth: 32 },
-      5: { cellWidth: 40 },
-      6: { cellWidth: 50 },
-      7: { cellWidth: 32 },
-      8: { cellWidth: 'auto' }
+      2: { cellWidth: 20, halign:'center' },
+      3: { cellWidth: 35 },
+      4: { cellWidth: 55 },
+      5: { cellWidth: 35 },
+      6: { cellWidth: 'auto' }
     },
     margin: { left: margin, right: margin },
     didDrawPage: (hookData) => {

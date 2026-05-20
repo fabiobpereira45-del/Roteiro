@@ -25,12 +25,12 @@ app.get('/api/registros', async (req, res) => {
 
 // POST /api/registros - Criar novo registro
 app.post('/api/registros', async (req, res) => {
-  const { data, hora_saida, hora_retorno, conselheiro, motorista, destino, finalidade, observacoes } = req.body;
+  const { data, turno, conselheiro, motorista, destino, observacoes } = req.body;
   try {
     const result = await pool.query(
-      `INSERT INTO registros (data, hora_saida, hora_retorno, conselheiro, motorista, destino, finalidade, observacoes)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-      [data, hora_saida, hora_retorno || null, conselheiro, motorista, destino, finalidade, observacoes]
+      `INSERT INTO registros (data, turno, conselheiro, motorista, destino, observacoes)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [data, turno, conselheiro, motorista, destino, observacoes]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -42,13 +42,13 @@ app.post('/api/registros', async (req, res) => {
 // PUT /api/registros/:id - Atualizar um registro
 app.put('/api/registros/:id', async (req, res) => {
   const { id } = req.params;
-  const { data, hora_saida, hora_retorno, conselheiro, motorista, destino, finalidade, observacoes } = req.body;
+  const { data, turno, conselheiro, motorista, destino, observacoes } = req.body;
   try {
     const result = await pool.query(
       `UPDATE registros 
-       SET data = $1, hora_saida = $2, hora_retorno = $3, conselheiro = $4, motorista = $5, destino = $6, finalidade = $7, observacoes = $8
-       WHERE id = $9 RETURNING *`,
-      [data, hora_saida, hora_retorno || null, conselheiro, motorista, destino, finalidade, observacoes, id]
+       SET data = $1, turno = $2, conselheiro = $3, motorista = $4, destino = $5, observacoes = $6
+       WHERE id = $7 RETURNING *`,
+      [data, turno, conselheiro, motorista, destino, observacoes, id]
     );
     if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Registro não encontrado' });
