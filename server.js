@@ -10,8 +10,10 @@ app.use(express.json());
 // Servir arquivos estáticos (HTML e imagens) localmente
 app.use(express.static(__dirname));
 
+const connectionString = process.env.DATABASE_URL || "postgresql://neondb_owner:npg_zEedHTI0c8rN@ep-withered-waterfall-aqdcvaj1-pooler.c-8.us-east-1.aws.neon.tech/neondb?channel_binding=require&sslmode=require";
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString,
   ssl: { rejectUnauthorized: false }
 });
 

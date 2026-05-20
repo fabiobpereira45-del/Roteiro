@@ -7,8 +7,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const connectionString = process.env.DATABASE_URL || "postgresql://neondb_owner:npg_zEedHTI0c8rN@ep-withered-waterfall-aqdcvaj1-pooler.c-8.us-east-1.aws.neon.tech/neondb?channel_binding=require&sslmode=require";
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString,
   ssl: { rejectUnauthorized: false }
 });
 
@@ -19,12 +21,7 @@ app.get('/api/registros', async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ 
-      error: 'Erro ao buscar registros', 
-      details: err.message, 
-      has_db_url: !!process.env.DATABASE_URL,
-      has_postgres_url: !!process.env.POSTGRES_URL
-    });
+    res.status(500).json({ error: 'Erro ao buscar registros' });
   }
 });
 
