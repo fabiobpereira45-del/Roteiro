@@ -957,6 +957,13 @@
             <label>Motorista</label>
             <input type="text" id="fMotorista" value="Joseílton Teixeira" readonly>
           </div>
+          <div class="formGroup full" id="fSituacaoGroup">
+            <label>Situação do Conselheiro</label>
+            <select id="fSituacao" onchange="onSituacaoChange()">
+              <option value="">— Em atividade normal —</option>
+              <option value="Demandas Concluídas, Conselheiro em alerta para demandas emergenciais">⚠️ Demandas Concluídas, Conselheiro em alerta para demandas emergenciais</option>
+            </select>
+          </div>
           <div class="formGroup full">
             <label>Destino *</label>
             <input type="text" id="fDestino" placeholder="Ex: CREAS Narandiba, UPA Cajazeiras, Sede da SEMPS…">
@@ -1337,10 +1344,32 @@ async function saveRecord() {
   }
 }
 
+function onSituacaoChange() {
+  const sit = document.getElementById('fSituacao').value;
+  const dest = document.getElementById('fDestino');
+  if (sit) {
+    dest.value = sit;
+    dest.readOnly = true;
+    dest.style.backgroundColor = 'var(--cinza-claro)';
+  } else {
+    dest.value = '';
+    dest.readOnly = false;
+    dest.style.backgroundColor = '';
+  }
+}
+
 function clearForm() {
   ['fData','fDestino','fObservacoes']
     .forEach(id => document.getElementById(id).value = '');
   document.getElementById('fTurno').value = 'Manhã';
+  
+  const sit = document.getElementById('fSituacao');
+  if (sit) sit.value = '';
+  
+  const dest = document.getElementById('fDestino');
+  dest.readOnly = false;
+  dest.style.backgroundColor = '';
+
   if (currentUser.role === 'secretario') document.getElementById('fConselheiro').value = '';
 }
 
