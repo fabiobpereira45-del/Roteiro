@@ -1,2 +1,4 @@
 .skills/
 .gemini/
+node_modules/
+.env

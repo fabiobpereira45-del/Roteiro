@@ -931,13 +931,44 @@ const CONSELHEIROS = [
 ];
 const MOTORISTA = 'Joseílton Teixeira';
 
+const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000/api' : '/api';
 let currentUser = null;
-let records = JSON.parse(localStorage.getItem('ct13_records') || '[]');
-let nextId = parseInt(localStorage.getItem('ct13_nextId') || '1');
+let records = [];
 
-function saveData() {
-  localStorage.setItem('ct13_records', JSON.stringify(records));
-  localStorage.setItem('ct13_nextId', String(nextId));
+async function loadData() {
+  try {
+    const res = await fetch(`${API_BASE}/registros`);
+    if (res.ok) {
+      const dbRecords = await res.json();
+      records = dbRecords.map(r => {
+        let d = r.data;
+        if (d && d.includes('T')) d = d.split('T')[0];
+        let hs = r.hora_saida;
+        if (hs && hs.length > 5) hs = hs.substring(0,5);
+        let hr = r.hora_retorno;
+        if (hr && hr.length > 5) hr = hr.substring(0,5);
+        
+        return {
+          id: r.id,
+          data: d,
+          horaSaida: hs,
+          horaRet: hr || '',
+          conselheiro: r.conselheiro,
+          motorista: r.motorista,
+          destino: r.destino,
+          finalidade: r.finalidade,
+          obs: r.observacoes || ''
+        };
+      });
+      renderTable();
+      if (document.getElementById('tabContent-painel').style.display !== 'none') {
+        renderPainel();
+      }
+    }
+  } catch (err) {
+    console.error('Erro na API:', err);
+    showToast('❌ Falha ao conectar no servidor', 'error');
+  }
 }
 
 // ============================================================
@@ -960,7 +991,7 @@ function doLogin() {
   document.getElementById('userBadge').textContent = '👤 ' + currentUser.name +
     (currentUser.role === 'secretario' ? ' (Secretário)' : '');
   initSelects();
-  showTab('painel');
+  loadData().then(() => showTab('painel'));
 }
 
 document.getElementById('loginPass').addEventListener('keydown', e => {
@@ -1029,7 +1060,7 @@ function setTodayDate() {
 // ============================================================
 // CRUD
 // ============================================================
-function saveRecord() {
+async function saveRecord() {
   const data       = document.getElementById('fData').value;
   const horaSaida  = document.getElementById('fHoraSaida').value;
   const horaRet    = document.getElementById('fHoraRetorno').value;
@@ -1053,20 +1084,28 @@ function saveRecord() {
     showToast('⚠️ O horário deve ser entre 08h e 20h.', 'error'); return;
   }
 
-  const rec = {
-    id: nextId++,
-    data, horaSaida, horaRet,
-    conselheiro,
-    motorista: MOTORISTA,
-    destino, finalidade, obs,
-    criadoPor: currentUser.login,
-    criadoEm: new Date().toISOString()
+  const payload = {
+    data, hora_saida: horaSaida, hora_retorno: horaRet,
+    conselheiro, motorista: MOTORISTA, destino, finalidade, observacoes: obs
   };
-  records.unshift(rec);
-  saveData();
-  clearForm();
-  showToast('✅ Registro salvo com sucesso!', 'success');
-  showTab('registros');
+  
+  try {
+    const res = await fetch(`${API_BASE}/registros`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) {
+      await loadData();
+      clearForm();
+      showToast('✅ Registro salvo com sucesso!', 'success');
+      showTab('registros');
+    } else {
+      showToast('❌ Erro ao salvar no banco', 'error');
+    }
+  } catch (err) {
+    showToast('❌ Erro de conexão', 'error');
+  }
 }
 
 function clearForm() {
@@ -1080,16 +1119,20 @@ function cancelEdit() {
   showTab('registros');
 }
 
-function deleteRecord(id) {
-  const rec = records.find(r => r.id === id);
-  if (!rec) return;
-  if (!canManage(rec)) { showToast('❌ Sem permissão para excluir este registro.', 'error'); return; }
+async function deleteRecord(id) {
   if (!confirm('Deseja realmente excluir este registro?')) return;
-  records = records.filter(r => r.id !== id);
-  saveData();
-  renderTable();
-  renderPainel();
-  showToast('🗑️ Registro excluído.', 'success');
+  
+  try {
+    const res = await fetch(`${API_BASE}/registros/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+      await loadData();
+      showToast('🗑️ Registro excluído.', 'success');
+    } else {
+      showToast('❌ Erro ao excluir do banco', 'error');
+    }
+  } catch(err) {
+    showToast('❌ Erro de conexão', 'error');
+  }
 }
 
 function openEdit(id) {
@@ -1108,7 +1151,7 @@ function openEdit(id) {
   document.getElementById('modalEdit').classList.add('open');
 }
 
-function saveEdit() {
+async function saveEdit() {
   const id = parseInt(document.getElementById('meditId').value);
   const idx = records.findIndex(r => r.id === id);
   if (idx < 0) return;
@@ -1124,13 +1167,30 @@ function saveEdit() {
     showToast('Preencha os campos obrigatórios.', 'error'); return;
   }
 
-  records[idx] = { ...records[idx], data, horaSaida, horaRet, destino, finalidade, obs,
-    editadoEm: new Date().toISOString() };
-  saveData();
-  closeModal();
-  renderTable();
-  renderPainel();
-  showToast('✅ Registro atualizado!', 'success');
+  const conselheiro = document.getElementById('mConselheiro').value;
+  const motorista   = document.getElementById('mMotorista').value;
+  
+  const payload = { 
+    data, hora_saida: horaSaida, hora_retorno: horaRet, 
+    conselheiro, motorista, destino, finalidade, observacoes: obs 
+  };
+
+  try {
+    const res = await fetch(`${API_BASE}/registros/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) {
+      await loadData();
+      closeModal();
+      showToast('✅ Registro atualizado!', 'success');
+    } else {
+      showToast('❌ Erro ao atualizar no banco', 'error');
+    }
+  } catch (err) {
+    showToast('❌ Erro de conexão', 'error');
+  }
 }
 
 function closeModal() {
@@ -1445,22 +1505,9 @@ document.getElementById('modalEdit').addEventListener('click', function(e) {
 });
 
 // ============================================================
-// DEMO DATA (seed if empty)
+// DEMO DATA (REMOVIDO PARA USAR BANCO DE DADOS REAL)
 // ============================================================
-(function seedDemo() {
-  if (records.length > 0) return;
-  const demos = [
-    { data:'2025-05-05', horaSaida:'08:30', horaRet:'11:00', conselheiro:'Regiane Santos', destino:'CREAS Narandiba', finalidade:'Atendimento a família em vulnerabilidade', obs:'Reunião com assistente social', criadoPor:'regiane' },
-    { data:'2025-05-05', horaSaida:'13:00', horaRet:'16:30', conselheiro:'Fábio Barreto', destino:'Hospital Irmã Dulce', finalidade:'Acompanhamento de criança hospitalizada', obs:'', criadoPor:'fabio' },
-    { data:'2025-05-06', horaSaida:'09:00', horaRet:'12:00', conselheiro:'Alex Teles', destino:'Escola Municipal de Narandiba', finalidade:'Denúncia de evasão escolar', obs:'Conversa com direção da escola', criadoPor:'alex' },
-    { data:'2025-05-07', horaSaida:'14:00', horaRet:'17:00', conselheiro:'Joilsom Souza', destino:'Delegacia de Menores', finalidade:'Acompanhamento de adolescente em conflito', obs:'', criadoPor:'joilsom' },
-    { data:'2025-05-08', horaSaida:'08:00', horaRet:'10:30', conselheiro:'Jaílton Santana', destino:'SEMPS – Sede', finalidade:'Reunião de alinhamento', obs:'Parada intermediária no CAPS', criadoPor:'jailton' },
-  ];
-  demos.forEach(d => {
-    records.unshift({ id: nextId++, motorista: MOTORISTA, criadoEm: new Date().toISOString(), ...d });
-  });
-  saveData();
-})();
+
 </script>
 </body>
 </html>
