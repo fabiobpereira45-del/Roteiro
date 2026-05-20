@@ -17,7 +17,8 @@ CREATE TABLE registros (
   destino VARCHAR(255) NOT NULL,
   observacoes TEXT,
   criado_por VARCHAR(50) NOT NULL,
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  editado_em TIMESTAMP DEFAULT NULL
 );
 `;
 

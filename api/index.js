@@ -48,7 +48,8 @@ app.put('/api/registros/:id', async (req, res) => {
   try {
     const result = await pool.query(
       `UPDATE registros 
-       SET data = $1, turno = $2, conselheiro = $3, motorista = $4, destino = $5, observacoes = $6
+       SET data = $1, turno = $2, conselheiro = $3, motorista = $4, destino = $5, observacoes = $6,
+           editado_em = CURRENT_TIMESTAMP
        WHERE id = $7 RETURNING *`,
       [data, turno, conselheiro, motorista, destino, observacoes, id]
     );

@@ -820,6 +820,37 @@
     margin-top: -8px;
     margin-bottom: 14px;
   }
+
+  /* ── TIMESTAMPS ── */
+  .recTs {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 6px;
+  }
+  .recTs span {
+    font-size: 0.66rem;
+    color: var(--cinza);
+    white-space: nowrap;
+  }
+  .recTsEdit {
+    color: var(--laranja) !important;
+  }
+  .mCard-ts {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-top: 6px;
+    border-top: 1px dashed var(--cinza-claro);
+  }
+  .mCard-ts span {
+    font-size: 0.7rem;
+    color: var(--cinza);
+  }
+  .mCard-ts-edit {
+    color: var(--laranja) !important;
+    font-weight: 500;
+  }
 </style>
 </head>
 <body>
@@ -1162,7 +1193,9 @@ async function loadData() {
           motorista: r.motorista,
           destino: r.destino,
           obs: r.observacoes || '',
-          criadoPor: r.criado_por
+          criadoPor: r.criado_por,
+          criadoEm: r.criado_em || null,
+          editadoEm: r.editado_em || null
         };
       });
       renderTable();
@@ -1471,6 +1504,17 @@ function fmtDate(s) {
   return `${d}/${m}/${y}`;
 }
 
+function fmtDateTime(iso) {
+  if (!iso) return null;
+  const dt = new Date(iso);
+  const d = String(dt.getDate()).padStart(2,'0');
+  const m = String(dt.getMonth()+1).padStart(2,'0');
+  const y = dt.getFullYear();
+  const hh = String(dt.getHours()).padStart(2,'0');
+  const mm = String(dt.getMinutes()).padStart(2,'0');
+  return `${d}/${m}/${y} ${hh}:${mm}`;
+}
+
 function getFiltered(ini, fim, conselheiro, destino) {
   return records.filter(r => {
     if (ini && r.data < ini) return false;
@@ -1526,7 +1570,6 @@ function renderTable() {
   if (!data.length) {
     tbody.innerHTML = '';
     empty.style.display = 'block';
-    // Limpar cards mobile também
     const existing = document.getElementById('mCardListMain');
     if (existing) existing.innerHTML = '';
     return;
@@ -1536,6 +1579,12 @@ function renderTable() {
   // ── Tabela desktop ──
   tbody.innerHTML = data.map((r,i) => {
     const mine = canManage(r);
+    const criadoFmt = fmtDateTime(r.criadoEm);
+    const editadoFmt = fmtDateTime(r.editadoEm);
+    const tsHtml = `<div class="recTs">
+      ${criadoFmt ? `<span title="Salvo em">🕐 ${criadoFmt}</span>` : ''}
+      ${editadoFmt ? `<span title="Editado em" class="recTsEdit">✏️ ${editadoFmt}</span>` : ''}
+    </div>`;
     return `<tr>
       <td><span style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;">${r.id}</span></td>
       <td>${fmtDate(r.data)}</td>
@@ -1552,6 +1601,7 @@ function renderTable() {
             : `<span class="btnDisabled">🔒 Sem acesso</span>`
           }
         </div>
+        ${tsHtml}
       </td>
     </tr>`;
   }).join('');
@@ -1568,7 +1618,13 @@ function renderTable() {
   cardList.innerHTML = data.map(r => {
     const mine = canManage(r);
     const isTarde = r.turno === 'Tarde';
+    const criadoFmt = fmtDateTime(r.criadoEm);
+    const editadoFmt = fmtDateTime(r.editadoEm);
     const obsHtml = r.obs ? `<div class="mCard-obs">📝 ${r.obs}</div>` : '';
+    const tsHtml = `<div class="mCard-ts">
+      ${criadoFmt ? `<span>🕐 Salvo: ${criadoFmt}</span>` : ''}
+      ${editadoFmt ? `<span class="mCard-ts-edit">✏️ Editado: ${editadoFmt}</span>` : ''}
+    </div>`;
     const actHtml = mine
       ? `<button class="btnEdit" onclick="openEdit(${r.id})">✏️ Editar</button>
          <button class="btnDel" onclick="deleteRecord(${r.id})">🗑️ Excluir</button>`
@@ -1582,6 +1638,7 @@ function renderTable() {
         <div class="mCard-conselheiro">👤 ${r.conselheiro}</div>
         <div class="mCard-destino">📍 ${r.destino}</div>
         ${obsHtml}
+        ${tsHtml}
         <div class="mCard-actions">${actHtml}</div>
       </div>`;
   }).join('');
