@@ -20,7 +20,7 @@ const pool = new Pool({
 // GET /api/registros - Listar todos os registros
 app.get('/api/registros', async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM registros ORDER BY data DESC, CASE WHEN turno = 'Manhã' THEN 1 ELSE 2 END ASC");
+    const result = await pool.query("SELECT * FROM registros ORDER BY data DESC, CASE WHEN turno = 'Manhã' THEN 1 ELSE 2 END ASC, id DESC");
     res.json(result.rows);
   } catch (err) {
     console.error(err);
